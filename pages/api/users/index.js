@@ -5,13 +5,17 @@ export default async (req, res) => {
 
     const {limit, cursor} = req.query
     console.log(limit, cursor)
+    
     try {
         const users = await serverClient.query(
             q.Map(
                 q.Paginate(
                     q.Match(
                         q.Index('all_users')
-                    ), {size: parseInt(limit)}
+                    ), {size: parseInt(limit), 
+                        // after: null
+                        after: cursor ? [q.Ref(q.Collection('users'), cursor)] : ''
+                    }
                 ),
                 (ref) => q.Get(ref)
             )

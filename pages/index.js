@@ -52,17 +52,28 @@ export default function Home() {
   const limit = 6
   // const cursor = 'abc'
 
-  const getKey = (pageIndex, previousPageData) => {
+  const getKey = (pageIndex, prevPageData) => {
 
-    if (previousPageData && !previousPageData.data) return null
+    if (prevPageData) console.log(prevPageData.after)
 
     if (pageIndex === 0) return `/api/users?limit=7`
 
-    return `/api/users?limit=5&cursor=${previousPageData.after}`
+    if (prevPageData.length < limit) {
+      console.log('End of the list')
+      return null
+    }
+
+    // prevPageData.after.map((d) => {
+    //   console.log(`/api/users?limit=5&cursor=${d['@ref'].id}`)
+
+    //   return `/api/users?limit=5&cursor=${d['@ref'].id}`
+    // })
+
+    return `/api/users?limit=7&cursor=${prevPageData.after[0]['@ref'].id}`
   }
 
   const {data, error, mutate, size, setSize} = useSWRInfinite(getKey, swrFetcher)
-  
+  console.log(size)
   // let users = null
   // if (data) {
   //   data.map((d) => {
@@ -75,7 +86,7 @@ export default function Home() {
   if (data) {
     users = []
     for (const pageData of data) {
-      console.log(pageData.data)
+      // console.log(pageData.data)
       users = [...users, ...pageData.data]
     }
   }
@@ -139,7 +150,15 @@ export default function Home() {
             <div>loading the after...</div>
           )} */}
 
-          <button className='bg-blue-200'>Load more...</button>
+          <button
+            onClick={(e) => {
+                e.preventDefault()
+                setSize(size + 1)
+              }
+            } 
+            className='bg-blue-200'>
+            Load more...
+          </button>
         </div>
 
       </main>
