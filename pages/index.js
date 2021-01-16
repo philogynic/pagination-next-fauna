@@ -56,16 +56,32 @@ export default function Home() {
 
     if (previousPageData && !previousPageData.data) return null
 
-    if (pageIndex === 0) return `/api/users?limit=10`
+    if (pageIndex === 0) return `/api/users?limit=7`
 
     return `/api/users?limit=5&cursor=${previousPageData.after}`
   }
 
-  // const {data, mutate, size, setSize} = useSWRInfinite(getKey, swrFetcher)
+  const {data, error, mutate, size, setSize} = useSWRInfinite(getKey, swrFetcher)
+  
+  // let users = null
+  // if (data) {
+  //   data.map((d) => {
+  //     console.log(d.data)
+  //   })
+  // }
+  
+  let users = null
+
+  if (data) {
+    users = []
+    for (const pageData of data) {
+      console.log(pageData.data)
+      users = [...users, ...pageData.data]
+    }
+  }
 
 
-
-  const {data: users, error} = useSWR(`/api/users?limit=5&cursor=abc`, fetcher)
+  // const {data, error} = useSWR(`/api/users?limit=5&cursor=abc`, fetcher)
 
   return (
     <div className='font-mono'>
@@ -85,7 +101,21 @@ export default function Home() {
         </form>
 
         <div className='flex-1 flex flex-col bg-gray-100 overflow-y-auto'>
-          {/* {data ? (
+          {users ? (
+            users.map((d, index) => {
+              return (
+                <div 
+                  className='flex p-6 m-1 bg-white rounded-lg'
+                  key={d.ref['@ref'].id}
+                >{index} {d.data.name}</div>
+                
+              )
+            })
+          ) : (
+            <div>loading...</div>
+          )}
+
+        {/* {data ? (
             data.data.map((d, index) => {
               return (
                 <div 
@@ -95,34 +125,19 @@ export default function Home() {
                 
               )
             })
-            (<div>{data.after}</div>)
-          ) : (
-            <div>loading...</div>
-          )} */}
-
-        {users ? (
-            users.data.map((d, index) => {
-              return (
-                <div 
-                  className='flex p-6 m-1 bg-white rounded-lg'
-                  key={d.ref['@ref'].id}
-                >{index} {d.data.name}</div>
-                
-              )
-            })
           ) : (
             <div>loading...</div>
           )}
 
-          {users ? (
-            users.after.map((d) => {
+          {data ? (
+            data.after.map((d) => {
               return (
                 <div>{d['@ref'].id}</div>
               )
             })
           ) : (
             <div>loading the after...</div>
-          )}
+          )} */}
 
           <button className='bg-blue-200'>Load more...</button>
         </div>
